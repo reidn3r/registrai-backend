@@ -12,3 +12,55 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum TRANSACTION_TYPE {
+  INFLUX
+  OUTFLUX
+}
+
+enum CATEGORY {
+  HEALTH
+  MARKET
+  LEISURE
+}
+
+enum TRANSACTION_STATUS {
+  PLANNED
+  COMPLETED
+}
+
+model Tb_user {
+  user_id String @id @default(uuid())
+  email   String @unique
+  cpf     String @unique
+  name    String
+  phone   String @unique
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  Tb_transactions Tb_transactions[]
+}
+
+model Tb_transactions {
+  transaction_id String           @id @default(uuid())
+  value          Float            @db.DoublePrecision
+  influx_outflux TRANSACTION_TYPE @default(OUTFLUX)
+  description    String?
+  createdAt      DateTime         @default(now())
+
+  status TRANSACTION_STATUS @default(COMPLETED)
+
+  user           Tb_user @relation(fields: [tb_userUser_id], references: [user_id])
+  tb_userUser_id String
+
+  category               Tb_category @relation(fields: [tb_categoryCategory_id], references: [category_id])
+  tb_categoryCategory_id String
+}
+
+model Tb_category {
+  category_id     String            @id @default(uuid())
+  name            CATEGORY?
+  description     String?
+  createdAt       DateTime          @default(now())
+  Tb_transactions Tb_transactions[]
+}
