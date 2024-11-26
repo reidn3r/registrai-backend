@@ -1,6 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { AuthSignupSchema } from "../interfaces/auth/auth-signup-schema";
+import { container } from "../ioc-container";
+import { InversifyTypes } from "../config/types";
+import { AuthService } from "../services/auth-service";
 
 export async function AuthSignup(app:FastifyInstance){
     app.withTypeProvider<ZodTypeProvider>()
@@ -8,16 +11,15 @@ export async function AuthSignup(app:FastifyInstance){
             schema: AuthSignupSchema
         }, async (request, reply) => {
             try{
-                const supabase = app.diContainer.resolve("authProvider");
+                const authService = container.get<AuthService>(InversifyTypes.AuthService);
 
-                const { email, password } = request.body;
-                const { data, error } = await supabase.signupUser(email, password);
-    
-                if(error) return reply.status(error.status || 400).send({ error }); 
+                const { email, password, cpf, name, phone } = request.body;
+                const data  = await authService.signup(email, password, cpf, name, phone);
+
                 return reply.status(200).send({ 
-                    userId: data.user.id,
-                    role: data.user.role,
-                    email: data.user.email,
+                    userId: data.userId,
+                    role: data.role,
+                    email: data.email,
                 });
             }
             catch(err:any){

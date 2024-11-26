@@ -1,6 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { ConfirmSignupSchema } from "../interfaces/auth/auth-confirm-signup-schema";
+import { container } from '../ioc-container';
+import { InversifyTypes } from "../config/types";
+import { AuthService } from "../services/auth-service";
 
 export async function AuthConfirmSignup(app:FastifyInstance){
     app.withTypeProvider<ZodTypeProvider>()
@@ -8,14 +11,13 @@ export async function AuthConfirmSignup(app:FastifyInstance){
             schema: ConfirmSignupSchema
         }, async (request, reply) => {
             try{
-                const supabase = request.diScope.resolve("authProvider");
-    
+                const authService = container.get<AuthService>(InversifyTypes.AuthService);
+
                 const { token_hash, type, next } = request.query;
-                const { data, error } = await supabase.emailVerifyAndLogin(token_hash);
-                if(!error) return reply.status(200).send({ role: data.message.user.role }); 
-                    //redirect pro next
-    
-                return reply.status(400).send({message: "signup failed"});
+
+                const data = await authService.confirmSignup(token_hash);
+                return reply.status(200).send({ role: data.role }); 
+                    //redirect pro next    
             }
             catch(err:any){
                 throw new Error(err.message);

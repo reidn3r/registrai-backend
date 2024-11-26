@@ -1,5 +1,8 @@
+import "reflect-metadata";
 import { createClient } from "@supabase/supabase-js";
+import { injectable } from "inversify";
 
+@injectable()
 export class AuthProvider {
     private supabase;
     private supabase_url:string;
