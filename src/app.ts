@@ -3,6 +3,7 @@ import fastify from "fastify";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import { AuthSignup } from "./routes/auth-signup";
 import { AuthConfirmSignup } from "./routes/auth-confirm-signup-token";
+import { CreateTransaction } from "./routes/create-transacion";
 
 const app = fastify();
 
@@ -13,6 +14,7 @@ app.setValidatorCompiler(validatorCompiler);
 //Routes
 app.register(AuthSignup);
 app.register(AuthConfirmSignup);
+app.register(CreateTransaction);
 
 
 const PORT: number = Number(process.env.APP_PORT) || 8000;
